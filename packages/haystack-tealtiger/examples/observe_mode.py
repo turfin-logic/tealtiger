@@ -7,6 +7,8 @@ on your AI pipeline's traffic, including cost estimates, PII detections,
 and prompt injection attempts.
 """
 
+from __future__ import annotations
+
 from haystack import Pipeline
 from haystack.components.builders import PromptBuilder
 from haystack.components.generators import OpenAIGenerator

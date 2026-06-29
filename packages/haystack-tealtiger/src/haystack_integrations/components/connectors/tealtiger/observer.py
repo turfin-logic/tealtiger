@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import json
+from datetime import datetime
 from typing import Any
 
 from haystack import component, logging
@@ -39,6 +41,7 @@ class TealTigerObserver:
 
         # Telemetry
         self._invocations = 0
+        self._last_invocation_at: datetime | None = None
         self._total_cost = 0.0
         self._pii_detections = 0
         self._injection_attempts = 0
@@ -55,6 +58,7 @@ class TealTigerObserver:
             Dictionary with the exact same input text.
         """
         self._invocations += 1
+        self._last_invocation_at = datetime.now()
 
         try:
             # Observe cost and PII
@@ -84,14 +88,24 @@ class TealTigerObserver:
         """
         return {
             "invocations": self._invocations,
+            "last_invocation_at": self._last_invocation_at.isoformat() if self._last_invocation_at else None,
             "total_cost": self._total_cost,
             "pii_detections": self._pii_detections,
             "injection_attempts": self._injection_attempts,
         }
 
+    def report_json(self) -> str:
+        """Return actionable telemetry collected by the observer as a JSON string.
+        
+        Returns:
+            JSON string with invocation count, cost, PII, and injection stats.
+        """
+        return json.dumps(self.report())
+
     def reset(self) -> None:
         """Reset the observer telemetry."""
         self._invocations = 0
+        self._last_invocation_at = None
         self._total_cost = 0.0
         self._pii_detections = 0
         self._injection_attempts = 0
